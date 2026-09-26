@@ -1,4 +1,4 @@
-﻿#include "web_server.h"
+#include "web_server.h"
 
 void AppWebServer::begin(
     ConfigManager& configMgr,
@@ -125,9 +125,19 @@ void AppWebServer::handleGetStatus(AsyncWebServerRequest* request) {
     doc["free_heap"] = ESP.getFreeHeap();
     doc["last_update"] = (uint32_t)_alertService->getLastUpdateTime();
     
+    JsonArray events = doc["recent_events"].to<JsonArray>();
+    const AlertEvent* evs = _alertService->getRecentEvents();
+    uint8_t evCount = _alertService->getRecentEventCount();
+    for (uint8_t i = 0; i < evCount; i++) {
+        JsonObject ev = events.add<JsonObject>();
+        ev["district"] = evs[i].district_name;
+        ev["level"] = (uint8_t)evs[i].level;
+        ev["timestamp"] = (uint32_t)evs[i].timestamp;
+    }
+    
     String responseStr;
     serializeJson(doc, responseStr);
-    AsyncWebServerResponse* response = request->beginResponse(200, "application/json", responseStr);
+    AsyncWebServerResponse* response = request->beginResponse(200, "application/json; charset=utf-8", responseStr);
     addCorsHeaders(response);
     request->send(response);
 }
@@ -165,7 +175,7 @@ void AppWebServer::handleGetAlerts(AsyncWebServerRequest* request) {
 }
 
 void AppWebServer::handleGetStats(AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse(200, "application/json", _stats->toJson());
+    AsyncWebServerResponse* response = request->beginResponse(200, "application/json; charset=utf-8", _stats->toJson());
     addCorsHeaders(response);
     request->send(response);
 }
@@ -174,7 +184,7 @@ void AppWebServer::handleGetConfig(AsyncWebServerRequest* request) {
     JsonDocument doc;
     deserializeJson(doc, _configMgr->toJson());
     
-    if (doc.containsKey("api_token")) {
+    if (doc["api_token"].is<const char*>()) {
         String token = doc["api_token"].as<String>();
         if (token.length() > 4) {
             doc["api_token"] = String("...") + token.substring(token.length() - 4);
@@ -183,7 +193,7 @@ void AppWebServer::handleGetConfig(AsyncWebServerRequest* request) {
     
     String responseStr;
     serializeJson(doc, responseStr);
-    AsyncWebServerResponse* response = request->beginResponse(200, "application/json", responseStr);
+    AsyncWebServerResponse* response = request->beginResponse(200, "application/json; charset=utf-8", responseStr);
     addCorsHeaders(response);
     request->send(response);
 }

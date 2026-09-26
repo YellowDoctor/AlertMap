@@ -1,27 +1,27 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AlertMap UA</title>
+    <title>AlertMap UA — Карта тривог</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="logo">
-            <span class="logo-icon">рџ—єпёЏ</span> AlertMap <span style="color:var(--ua-blue)">U</span><span style="color:var(--ua-yellow)">A</span>
+            <span class="logo-icon">🗺️</span> AlertMap <span style="color:var(--ua-blue)">U</span><span style="color:var(--ua-yellow)">A</span>
             <span id="header-version" class="badge">v1.0.0</span>
         </div>
         <div class="status-indicator">
-            <span id="conn-status" class="dot dot-red"></span>
+            <span id="conn-status" class="dot dot-red" title="Статус з'єднання"></span>
         </div>
     </header>
 
     <nav class="tabs">
-        <a href="#home" class="tab active" data-target="home">рџЏ  Р“РѕР»РѕРІРЅР°</a>
-        <a href="#settings" class="tab" data-target="settings">вљ™пёЏ РќР°Р»Р°С€С‚СѓРІР°РЅРЅСЏ</a>
-        <a href="#stats" class="tab" data-target="stats">рџ“Љ РЎС‚Р°С‚РёСЃС‚РёРєР°</a>
-        <a href="#update" class="tab" data-target="update">рџ”„ РћРЅРѕРІР»РµРЅРЅСЏ</a>
+        <a href="#home" class="tab active" data-target="home">🏠 Головна</a>
+        <a href="#settings" class="tab" data-target="settings">⚙️ Налаштування</a>
+        <a href="#stats" class="tab" data-target="stats">📊 Статистика</a>
+        <a href="#update" class="tab" data-target="update">🔄 Оновлення</a>
     </nav>
 
     <main id="content">
@@ -29,57 +29,57 @@
         <div id="home" class="tab-pane active">
             <div class="card grid-2">
                 <div class="info-box">
-                    <span class="icon">рџ“¶</span>
+                    <span class="icon">📶</span>
                     <div>
-                        <div class="label">WiFi <span id="dash-rssi" style="font-size: 0.8em; opacity: 0.8"></span></div>
+                        <div class="label">Wi-Fi <span id="dash-rssi" style="font-size: 0.8em; opacity: 0.8"></span></div>
                         <div class="value" id="dash-wifi">--</div>
                     </div>
                 </div>
                 <div class="info-box">
-                    <span class="icon">рџ•’</span>
+                    <span class="icon">🕒</span>
                     <div>
-                        <div class="label">Р§Р°СЃ РїСЂРёСЃС‚СЂРѕСЋ</div>
-                        <div class="value" id="dash-time">--:--</div>
+                        <div class="label">Час пристрою</div>
+                        <div class="value" id="dash-time">--:--:--</div>
                     </div>
                 </div>
                 <div class="info-box">
-                    <span class="icon">вЏ±пёЏ</span>
+                    <span class="icon">⏱️</span>
                     <div>
-                        <div class="label">РђРїС‚Р°Р№Рј</div>
+                        <div class="label">Аптайм</div>
                         <div class="value" id="dash-uptime">--</div>
                     </div>
                 </div>
                 <div class="info-box">
-                    <span class="icon">рџЊ™</span>
+                    <span class="icon">🌙</span>
                     <div>
-                        <div class="label">Р РµР¶РёРј</div>
-                        <div class="value" id="dash-mode">Р”РµРЅСЊ</div>
+                        <div class="label">Режим</div>
+                        <div class="value" id="dash-mode">День</div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>РЎС‚Р°С‚СѓСЃ С‚СЂРёРІРѕРі</h3>
+                <h3>Статус тривог</h3>
                 <div class="alert-summaries">
                     <div class="summary-box bg-danger">
-                        <div class="sum-icon">рџ”ґ</div>
-                        <div class="sum-text">Р Р°РєРµС‚РЅР° РЅРµР±РµР·РїРµРєР°:<br> <strong id="sum-red">0</strong> СЂР°Р№РѕРЅС–РІ</div>
+                        <div class="sum-icon">🔴</div>
+                        <div class="sum-text">Ракетна / балістична небезпека:<br> <strong id="sum-red">0</strong> районів</div>
                     </div>
                     <div class="summary-box bg-warning">
-                        <div class="sum-icon">рџџЎ</div>
-                        <div class="sum-text">Р—Р°РіСЂРѕР·Р° РґСЂРѕРЅС–РІ:<br> <strong id="sum-yellow">0</strong> СЂР°Р№РѕРЅС–РІ</div>
+                        <div class="sum-icon">🟡</div>
+                        <div class="sum-text">Загроза ударних дронів:<br> <strong id="sum-yellow">0</strong> районів</div>
                     </div>
                     <div class="summary-box bg-success">
-                        <div class="sum-icon">рџџў</div>
-                        <div class="sum-text">Р’СЃРµ СЃРїРѕРєС–Р№РЅРѕ:<br> <strong id="sum-green">0</strong> СЂР°Р№РѕРЅС–РІ</div>
+                        <div class="sum-icon">🟢</div>
+                        <div class="sum-text">Все спокійно (без тривог):<br> <strong id="sum-green">0</strong> районів</div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>РћСЃС‚Р°РЅРЅС– РїРѕРґС–С— <span class="badge" id="dash-heap">RAM: --</span></h3>
+                <h3>Останні події <span class="badge" id="dash-heap">RAM: --</span></h3>
                 <ul class="event-list" id="event-list">
-                    <li class="empty">Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...</li>
+                    <li class="empty">Завантаження даних...</li>
                 </ul>
             </div>
         </div>
@@ -88,52 +88,52 @@
         <div id="settings" class="tab-pane">
             <form id="config-form">
                 <!-- API -->
-                <div class="card collapsible">
+                <div class="card collapsible open">
                     <div class="card-header">
-                        <h3>рџ“Ў API РќР°Р»Р°С€С‚СѓРІР°РЅРЅСЏ</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>📡 API Налаштування</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>API РўРѕРєРµРЅ</label>
+                            <label>API Токен (alerts.in.ua)</label>
                             <div class="input-group">
-                                <input type="password" id="cfg-apiToken" placeholder="Р’Р°С€ С‚РѕРєРµРЅ">
-                                <button type="button" class="btn-icon toggle-pw">рџ‘ЃпёЏ</button>
+                                <input type="password" id="cfg-apiToken" placeholder="Введіть API токен">
+                                <button type="button" class="btn-icon toggle-pw" title="Показати/Приховати">👁️</button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Р†РЅС‚РµСЂРІР°Р» РѕРЅРѕРІР»РµРЅРЅСЏ (СЃРµРє)</label>
-                            <input type="number" id="cfg-updateInterval" min="5" max="3600">
+                            <label>Інтервал опитування (секунди)</label>
+                            <input type="number" id="cfg-updateInterval" min="5" max="3600" value="10">
                         </div>
                     </div>
                 </div>
 
                 <!-- Colors -->
-                <div class="card collapsible">
+                <div class="card collapsible open">
                     <div class="card-header">
-                        <h3>рџЋЁ РљРѕР»СЊРѕСЂРё С‚СЂРёРІРѕРі</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>🎨 Кольори тривог</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="color-grid">
                             <div class="color-item">
-                                <label>Р’СЃРµ РґРѕР±СЂРµ</label>
+                                <label>Все спокійно</label>
                                 <input type="color" id="cfg-colorOk" value="#00ff00">
                             </div>
                             <div class="color-item">
-                                <label>Р”СЂРѕРЅРё</label>
+                                <label>Дрони</label>
                                 <input type="color" id="cfg-colorDrone" value="#ffff00">
                             </div>
                             <div class="color-item">
-                                <label>Р Р°РєРµС‚Рё</label>
+                                <label>Ракети</label>
                                 <input type="color" id="cfg-colorMissile" value="#ff0000">
                             </div>
                             <div class="color-item">
-                                <label>Р§Р°СЃС‚РєРѕРІР°</label>
+                                <label>Часткова</label>
                                 <input type="color" id="cfg-colorPartial" value="#ff8800">
                             </div>
                             <div class="color-item">
-                                <label>РћС„Р»Р°Р№РЅ</label>
+                                <label>Офлайн</label>
                                 <input type="color" id="cfg-colorOffline" value="#0000ff">
                             </div>
                         </div>
@@ -141,19 +141,19 @@
                 </div>
 
                 <!-- Brightness -->
-                <div class="card collapsible">
+                <div class="card collapsible open">
                     <div class="card-header">
-                        <h3>рџ’Ў РЇСЃРєСЂР°РІС–СЃС‚СЊ</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>💡 Яскравість</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Р”РµРЅРЅР° СЏСЃРєСЂР°РІС–СЃС‚СЊ: <span id="val-dayBright">255</span></label>
-                            <input type="range" id="cfg-dayBright" min="0" max="255" value="255">
+                            <label>Денна яскравість: <span id="val-dayBright">128</span></label>
+                            <input type="range" id="cfg-dayBright" min="5" max="255" value="128">
                         </div>
                         <div class="form-group">
-                            <label>РќС–С‡РЅР° СЏСЃРєСЂР°РІС–СЃС‚СЊ: <span id="val-nightBright">50</span></label>
-                            <input type="range" id="cfg-nightBright" min="0" max="255" value="50">
+                            <label>Нічна яскравість: <span id="val-nightBright">20</span></label>
+                            <input type="range" id="cfg-nightBright" min="0" max="255" value="20">
                         </div>
                     </div>
                 </div>
@@ -161,83 +161,93 @@
                 <!-- Night Mode -->
                 <div class="card collapsible">
                     <div class="card-header">
-                        <h3>рџЊ™ РќС–С‡РЅРёР№ СЂРµР¶РёРј</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>🌙 Нічний режим</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group switch-group">
-                            <label>РЈРІС–РјРєРЅСѓС‚Рё РЅС–С‡РЅРёР№ СЂРµР¶РёРј</label>
+                            <label>Увімкнути нічний режим</label>
                             <label class="switch">
-                                <input type="checkbox" id="cfg-nightMode">
+                                <input type="checkbox" id="cfg-nightMode" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                         <div class="grid-2">
                             <div class="form-group">
-                                <label>РџРѕС‡Р°С‚РѕРє (РіРѕРґРёРЅР°)</label>
-                                <input type="number" id="cfg-nightStart" min="0" max="23">
+                                <label>Початок (година)</label>
+                                <input type="number" id="cfg-nightStart" min="0" max="23" value="23">
                             </div>
                             <div class="form-group">
-                                <label>РљС–РЅРµС†СЊ (РіРѕРґРёРЅР°)</label>
-                                <input type="number" id="cfg-nightEnd" min="0" max="23">
+                                <label>Кінець (година)</label>
+                                <input type="number" id="cfg-nightEnd" min="0" max="23" value="7">
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Animations -->
-                <div class="card collapsible">
+                <div class="card collapsible open">
                     <div class="card-header">
-                        <h3>вњЁ РђРЅС–РјР°С†С–С—</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>🎬 Режими анімації тривог</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
+                        <div class="form-group">
+                            <label>Ефект при появі нової тривоги</label>
+                            <select id="cfg-animMode">
+                                <option value="0">🌊 Плавна зміна (Fade)</option>
+                                <option value="1">⚡ Миготіння району (Blink — 5 спалахів)</option>
+                                <option value="2">🚨 Стробоскоп (Strobe — 8 спалахів)</option>
+                                <option value="3">💫 Біжуча хвиля (Wave)</option>
+                                <option value="4">🫀 Дихання / Пульсація (Breathe)</option>
+                            </select>
+                        </div>
                         <div class="form-group switch-group">
-                            <label>РџР»Р°РІРЅС– РїРµСЂРµС…РѕРґРё</label>
+                            <label>Плавні колірні переходи</label>
                             <label class="switch">
-                                <input type="checkbox" id="cfg-animSmooth">
+                                <input type="checkbox" id="cfg-animSmooth" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                         <div class="form-group switch-group">
-                            <label>РџСѓР»СЊСЃР°С†С–СЏ РїСЂРё С‚СЂРёРІРѕР·С–</label>
+                            <label>Пульсація діодів з тривогою</label>
                             <label class="switch">
-                                <input type="checkbox" id="cfg-animPulse">
+                                <input type="checkbox" id="cfg-animPulse" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                         <div class="form-group switch-group">
-                            <label>РҐРІРёР»СЏ РїСЂРё РЅРѕРІС–Р№ С‚СЂРёРІРѕР·С–</label>
+                            <label>Хвиля світла при новій тривозі</label>
                             <label class="switch">
-                                <input type="checkbox" id="cfg-animWave">
+                                <input type="checkbox" id="cfg-animWave" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- LED Type -->
+                <!-- LED Strip -->
                 <div class="card collapsible">
                     <div class="card-header">
-                        <h3>рџ’Ў LED СЃС‚СЂС–С‡РєР°</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>💡 LED стрічка</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>РўРёРї СЃРІС–С‚Р»РѕРґС–РѕРґС–РІ</label>
+                            <label>Тип світлодіодів</label>
                             <select id="cfg-ledType">
-                                <option value="WS2812B">WS2812B</option>
-                                <option value="WS2815">WS2815</option>
-                                <option value="SK6812">SK6812</option>
-                                <option value="GS8208">GS8208</option>
+                                <option value="1">WS2815B (12V — за замовчуванням)</option>
+                                <option value="0">WS2812B (5V)</option>
+                                <option value="2">SK6812</option>
+                                <option value="3">GS8208</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>РџРѕСЂСЏРґРѕРє РєРѕР»СЊРѕСЂС–РІ</label>
+                            <label>Порядок кольорів</label>
                             <select id="cfg-colorOrder">
-                                <option value="GRB">GRB</option>
-                                <option value="RGB">RGB</option>
-                                <option value="BRG">BRG</option>
+                                <option value="0">GRB (стандарт WS2812/WS2815)</option>
+                                <option value="1">RGB</option>
+                                <option value="2">BRG</option>
                             </select>
                         </div>
                     </div>
@@ -246,20 +256,20 @@
                 <!-- GitHub OTA -->
                 <div class="card collapsible">
                     <div class="card-header">
-                        <h3>рџ”§ GitHub OTA</h3>
-                        <span class="toggle-icon">в–ј</span>
+                        <h3>☁️ GitHub OTA оновлення</h3>
+                        <span class="toggle-icon">▼</span>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Р’Р»Р°СЃРЅРёРє (Owner)</label>
-                            <input type="text" id="cfg-ghOwner">
+                            <label>Власник репозиторію (Owner)</label>
+                            <input type="text" id="cfg-ghOwner" placeholder="YellowDoctor">
                         </div>
                         <div class="form-group">
-                            <label>Р РµРїРѕР·РёС‚РѕСЂС–Р№ (Repo)</label>
-                            <input type="text" id="cfg-ghRepo">
+                            <label>Назва репозиторію (Repo)</label>
+                            <input type="text" id="cfg-ghRepo" placeholder="AlertMap">
                         </div>
                         <div class="form-group switch-group">
-                            <label>РђРІС‚Рѕ-РїРµСЂРµРІС–СЂРєР°</label>
+                            <label>Автоматична перевірка оновлень</label>
                             <label class="switch">
                                 <input type="checkbox" id="cfg-ghAutoCheck">
                                 <span class="slider"></span>
@@ -269,27 +279,27 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-primary btn-block">рџ’ѕ Р—Р±РµСЂРµРіС‚Рё РЅР°Р»Р°С€С‚СѓРІР°РЅРЅСЏ</button>
-                    <button type="button" class="btn btn-secondary btn-block" id="btn-test">рџ§Є РўРµСЃС‚РѕРІРёР№ СЂРµР¶РёРј LED</button>
-                    <button type="button" class="btn btn-danger btn-block" id="btn-restart">рџ”„ РџРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РёС‚Рё</button>
+                    <button type="submit" class="btn btn-primary btn-block">💾 Зберегти налаштування</button>
+                    <button type="button" class="btn btn-secondary btn-block" id="btn-test">🧪 Тестовий режим (Райдуга)</button>
+                    <button type="button" class="btn btn-danger btn-block" id="btn-restart">🔄 Перезавантажити пристрій</button>
                 </div>
             </form>
 
             <div class="card mt-2">
-                <h3>рџ“¶ РќР°Р»Р°С€С‚СѓРІР°РЅРЅСЏ WiFi</h3>
+                <h3>📶 Налаштування Wi-Fi</h3>
                 <form id="wifi-form">
                     <div class="form-group">
-                        <label>SSID</label>
-                        <input type="text" id="wifi-ssid" placeholder="РќР°Р·РІР° РјРµСЂРµР¶С–" required>
+                        <label>Ім'я мережі (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="Назва вашого Wi-Fi" required>
                     </div>
                     <div class="form-group">
-                        <label>РџР°СЂРѕР»СЊ</label>
+                        <label>Пароль Wi-Fi</label>
                         <div class="input-group">
-                            <input type="password" id="wifi-pass" placeholder="РџР°СЂРѕР»СЊ">
-                            <button type="button" class="btn-icon toggle-pw">рџ‘ЃпёЏ</button>
+                            <input type="password" id="wifi-pass" placeholder="Пароль до мережі">
+                            <button type="button" class="btn-icon toggle-pw" title="Показати/Приховати">👁️</button>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">рџ’ѕ Р—Р±РµСЂРµРіС‚Рё WiFi</button>
+                    <button type="submit" class="btn btn-primary btn-block">💾 Зберегти та підключитись</button>
                 </form>
             </div>
         </div>
@@ -297,17 +307,17 @@
         <!-- STATS TAB -->
         <div id="stats" class="tab-pane">
             <div class="card">
-                <h3>РЎС‚Р°С‚РёСЃС‚РёРєР° СЃРёСЃС‚РµРјРё</h3>
+                <h3>📊 Статистика системи</h3>
                 <ul class="stats-list">
-                    <li><span>РўСЂРёРІРѕРі СЃСЊРѕРіРѕРґРЅС–:</span> <strong id="stat-alertsToday">0</strong></li>
-                    <li><span>Р’С–РґР±РѕС—РІ СЃСЊРѕРіРѕРґРЅС–:</span> <strong id="stat-clearsToday">0</strong></li>
-                    <li><span>РћСЃС‚Р°РЅРЅСЏ С‚СЂРёРІРѕРіР°:</span> <strong id="stat-lastAlert">--:--</strong></li>
-                    <li><span>РќР°Р№РґРѕРІС€Р° С‚СЂРёРІРѕРіР°:</span> <strong id="stat-longestAlert">--</strong></li>
-                    <li><span>РђРїС‚Р°Р№Рј:</span> <strong id="stat-uptime">--</strong></li>
-                    <li><span>WiFi СЂРµРєРѕРЅРµРєС‚С–РІ:</span> <strong id="stat-wifiReconnects">0</strong></li>
-                    <li><span>API Р·Р°РїРёС‚С–РІ:</span> <strong id="stat-apiRequests">0</strong></li>
-                    <li><span>API РїРѕРјРёР»РѕРє:</span> <strong id="stat-apiErrors">0</strong></li>
-                    <li><span>Р’С–Р»СЊРЅР° РїР°Рј'СЏС‚СЊ:</span> <strong id="stat-freeHeap">--</strong></li>
+                    <li><span>Тривог сьогодні:</span> <strong id="stat-alertsToday">0</strong></li>
+                    <li><span>Відбоїв сьогодні:</span> <strong id="stat-clearsToday">0</strong></li>
+                    <li><span>Остання тривога:</span> <strong id="stat-lastAlert">--:--</strong></li>
+                    <li><span>Найдовша тривога:</span> <strong id="stat-longestAlert">--</strong></li>
+                    <li><span>Аптайм карти:</span> <strong id="stat-uptime">--</strong></li>
+                    <li><span>Wi-Fi перепідключень:</span> <strong id="stat-wifiReconnects">0</strong></li>
+                    <li><span>API запитів:</span> <strong id="stat-apiRequests">0</strong></li>
+                    <li><span>API помилок (ліміти/мережа):</span> <strong id="stat-apiErrors">0</strong></li>
+                    <li><span>Вільна оперативна пам'ять:</span> <strong id="stat-freeHeap">--</strong></li>
                 </ul>
             </div>
         </div>
@@ -315,36 +325,37 @@
         <!-- UPDATE TAB -->
         <div id="update" class="tab-pane">
             <div class="card">
-                <h3>РџРѕС‚РѕС‡РЅР° РІРµСЂСЃС–СЏ: <span id="fw-version" class="badge">--</span></h3>
+                <h3>Поточна версія прошивки: <span id="fw-version" class="badge">--</span></h3>
                 
                 <div class="ota-section mt-2">
                     <h4>GitHub OTA (<span id="gh-repo-display">--/--</span>)</h4>
-                    <button type="button" id="btn-check-update" class="btn btn-secondary btn-block">рџ”Ќ РџРµСЂРµРІС–СЂРёС‚Рё РѕРЅРѕРІР»РµРЅРЅСЏ</button>
+                    <button type="button" id="btn-check-update" class="btn btn-secondary btn-block">🔍 Перевірити наявність оновлень</button>
                     
                     <div id="gh-update-info" class="hidden mt-1">
-                        <div class="alert alert-info" id="gh-release-notes"></div>
-                        <button type="button" id="btn-do-update" class="btn btn-primary btn-block mt-1">в¬‡пёЏ РћРЅРѕРІРёС‚Рё РїСЂРѕС€РёРІРєСѓ Р· GitHub</button>
+                        <div class="alert alert-info" id="gh-release-notes" style="white-space:pre-wrap; margin:10px 0;"></div>
+                        <button type="button" id="btn-do-update" class="btn btn-primary btn-block mt-1">⬇️ Завантажити та оновити з GitHub</button>
                     </div>
                 </div>
 
-                <hr style="border: 1px solid var(--bg-secondary); margin: 20px 0;">
+                <hr style="border: 1px solid var(--accent); margin: 20px 0;">
 
                 <div class="ota-section mt-2">
-                    <h4>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С„Р°Р№Р»Сѓ (.bin)</h4>
+                    <h4>Ручне завантаження файлу (.bin)</h4>
                     <form id="upload-form">
                         <div class="form-group">
+                            <label>Оберіть файл прошивки (firmware.bin або littlefs.bin):</label>
                             <input type="file" id="fw-file" accept=".bin" required class="file-input">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">в¬†пёЏ Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїСЂРѕС€РёРІРєСѓ</button>
+                        <button type="submit" class="btn btn-primary btn-block">⬆️ Завантажити та прошити</button>
                     </form>
                 </div>
 
                 <div id="update-progress-container" class="hidden mt-2">
-                    <h4>РџСЂРѕС†РµСЃ РѕРЅРѕРІР»РµРЅРЅСЏ</h4>
+                    <h4>Прогрес оновлення</h4>
                     <div class="progress-bar">
                         <div class="progress-fill" id="update-fill" style="width: 0%"></div>
                     </div>
-                    <div class="progress-text" id="update-text">0% - Р†РЅС–С†С–Р°Р»С–Р·Р°С†С–СЏ...</div>
+                    <div class="progress-text" id="update-text">0% — Ініціалізація...</div>
                 </div>
             </div>
         </div>
@@ -353,11 +364,11 @@
     <!-- Modal Dialog -->
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content card">
-            <h3 id="modal-title">РџС–РґС‚РІРµСЂРґР¶РµРЅРЅСЏ</h3>
-            <p id="modal-desc">Р’Рё РІРїРµРІРЅРµРЅС–?</p>
+            <h3 id="modal-title">Підтвердження</h3>
+            <p id="modal-desc">Ви впевнені?</p>
             <div class="modal-actions">
-                <button class="btn btn-secondary" id="modal-cancel">РЎРєР°СЃСѓРІР°С‚Рё</button>
-                <button class="btn btn-danger" id="modal-confirm">РџС–РґС‚РІРµСЂРґРёС‚Рё</button>
+                <button class="btn btn-secondary" id="modal-cancel">Скасувати</button>
+                <button class="btn btn-danger" id="modal-confirm">Підтвердити</button>
             </div>
         </div>
     </div>

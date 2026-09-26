@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
 
@@ -12,16 +12,16 @@ function initApp() {
     setupPasswordToggles();
     setupEventListeners();
     
-    // Initial fetch
+    // Початкове завантаження
     fetchStatus();
     fetchConfig();
     fetchStats();
 
-    // Setup polling
+    // Запуск періодичного оновлення
     startPolling();
 }
 
-// --- TAB ROUTING ---
+// --- НАВІГАЦІЯ ПО ВКЛАДКАХ ---
 function setupTabs() {
     const tabs = document.querySelectorAll('.tab');
     const hash = window.location.hash || '#home';
@@ -31,10 +31,10 @@ function setupTabs() {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         
         const pane = document.getElementById(targetId);
-        if(pane) pane.classList.add('active');
+        if (pane) pane.classList.add('active');
         
         const tab = document.querySelector(`.tab[data-target="${targetId}"]`);
-        if(tab) tab.classList.add('active');
+        if (tab) tab.classList.add('active');
         
         window.location.hash = targetId;
     }
@@ -61,53 +61,79 @@ function setupPasswordToggles() {
     document.querySelectorAll('.toggle-pw').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = btn.previousElementSibling;
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.textContent = 'рџ™€';
-            } else {
-                input.type = 'password';
-                btn.textContent = 'рџ‘ЃпёЏ';
+            if (input && input.tagName === 'INPUT') {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = '🔒';
+                } else {
+                    input.type = 'password';
+                    btn.textContent = '👁️';
+                }
             }
         });
     });
 }
 
-// --- NOTIFICATIONS ---
+// --- СПОВІЩЕННЯ (TOASTS) ---
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.className = `toast toast-${type}`;
     
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    if (type === 'error') icon = '❌';
+    if (type === 'warning') icon = '⚠️';
+    
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
     container.appendChild(toast);
     
     setTimeout(() => {
         toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
 
-function updateConnectionStatus(status) {
-    const indicator = document.getElementById('conn-status');
-    isOnline = status;
-    if (status) {
-        indicator.className = 'dot dot-green';
-    } else {
-        indicator.className = 'dot dot-red';
+// --- СТАТУС З'ЄДНАННЯ ---
+function updateConnectionStatus(online) {
+    isOnline = online;
+    const dot = document.getElementById('conn-status');
+    if (dot) {
+        if (online) {
+            dot.className = 'dot dot-green';
+            dot.title = "Плата онлайн";
+        } else {
+            dot.className = 'dot dot-red';
+            dot.title = "Немає зв'язку з картою";
+        }
     }
 }
 
-// --- UTILS ---
+// --- ДОПОМІЖНІ ФУНКЦІЇ ---
 const hexToUint32 = hex => parseInt(hex.replace('#', ''), 16);
-const uint32ToHex = num => '#' + num.toString(16).padStart(6, '0');
-const formatUptime = (sec) => {
+const uint32ToHex = num => '#' + ((num || 0) & 0xFFFFFF).toString(16).padStart(6, '0');
+
+function formatUptime(sec) {
+    if (!sec && sec !== 0) return '--';
     const d = Math.floor(sec / 86400);
     const h = Math.floor((sec % 86400) / 3600);
     const m = Math.floor((sec % 3600) / 60);
-    return `${d}Рґ ${h}Рі ${m}С…РІ`;
-};
+    const s = sec % 60;
+    if (d > 0) return `${d}д ${h}г ${m}хв`;
+    if (h > 0) return `${h}г ${m}хв ${s}с`;
+    return `${m}хв ${s}с`;
+}
 
-// --- MODAL ---
+function formatDuration(sec) {
+    if (!sec) return '--';
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    if (h > 0) return `${h}г ${m}хв`;
+    return `${m}хв ${s}с`;
+}
+
+// --- МОДАЛЬНЕ ВІКНО ПІДТВЕРДЖЕННЯ ---
 function showConfirmModal(title, desc, onConfirm) {
     const modal = document.getElementById('confirm-modal');
     document.getElementById('modal-title').textContent = title;
@@ -131,11 +157,11 @@ function showConfirmModal(title, desc, onConfirm) {
     confirmBtn.addEventListener('click', onOk);
 }
 
-// --- API CALLS ---
+// --- API ВИКЛИКИ ---
 async function apiGet(endpoint) {
     try {
-        const res = await fetch(endpoint, { timeout: 3000 });
-        if (!res.ok) throw new Error('Response not OK');
+        const res = await fetch(endpoint, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Помилка сервера: ' + res.status);
         const data = await res.json();
         updateConnectionStatus(true);
         return data;
@@ -152,18 +178,18 @@ async function apiPost(endpoint, body) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        if (!res.ok) throw new Error('Response not OK');
-        showToast('СѓСЃРїС–С€РЅРѕ!', 'success');
+        if (!res.ok) throw new Error('Помилка сервера: ' + res.status);
+        updateConnectionStatus(true);
         return await res.json();
     } catch (err) {
-        showToast('РџРѕРјРёР»РєР° Р·Р°РїРёС‚Сѓ', 'error');
+        updateConnectionStatus(false);
         throw err;
     }
 }
 
-// --- DATA FETCHING & RENDERING ---
+// --- ПЕРІОДИЧНЕ ОПИТУВАННЯ ---
 function startPolling() {
-    pollingIntervals.status = setInterval(fetchStatus, 5000);
+    pollingIntervals.status = setInterval(fetchStatus, 4000);
     pollingIntervals.stats = setInterval(fetchStats, 10000);
 }
 
@@ -171,60 +197,103 @@ async function fetchStatus() {
     try {
         const data = await apiGet('/api/status');
         
-        // Render Header & Dashboard
-        document.getElementById('header-version').textContent = 'v' + data.version;
-        document.getElementById('fw-version').textContent = data.version;
+        // Шапка та версія
+        if (data.version) {
+            document.getElementById('header-version').textContent = 'v' + data.version;
+            document.getElementById('fw-version').textContent = 'v' + data.version;
+        }
         
-        document.getElementById('dash-wifi').textContent = data.wifi.ssid || '--';
-        document.getElementById('dash-rssi').textContent = `${data.wifi.rssi} dBm`;
-        document.getElementById('dash-time').textContent = data.time || '--:--';
+        // Wi-Fi інформація
+        const wifiEl = document.getElementById('dash-wifi');
+        if (data.wifi_state === 3) {
+            wifiEl.textContent = 'Точка доступу';
+        } else if (data.wifi_ssid && data.wifi_ssid.length > 0) {
+            wifiEl.textContent = data.wifi_ssid;
+        } else {
+            wifiEl.textContent = 'Немає з'єднання';
+        }
+        
+        if (data.wifi_rssi) {
+            document.getElementById('dash-rssi').textContent = `${data.wifi_rssi} dBm`;
+        } else {
+            document.getElementById('dash-rssi').textContent = '';
+        }
+        
+        // Час та аптайм
+        document.getElementById('dash-time').textContent = data.current_time || '--:--:--';
         document.getElementById('dash-uptime').textContent = formatUptime(data.uptime);
-        document.getElementById('dash-mode').textContent = data.isNightMode ? 'РќС–С‡' : 'Р”РµРЅСЊ';
-        document.getElementById('dash-heap').textContent = `RAM: ${(data.freeHeap / 1024).toFixed(1)} KB`;
-
-        // Render Alerts
-        if (data.alerts) {
-            document.getElementById('sum-red').textContent = data.alerts.red || 0;
-            document.getElementById('sum-yellow').textContent = data.alerts.yellow || 0;
-            document.getElementById('sum-green').textContent = data.alerts.green || 0;
+        document.getElementById('dash-mode').textContent = data.is_night ? '🌙 Ніч' : '☀️ День';
+        
+        if (data.free_heap) {
+            document.getElementById('dash-heap').textContent = `RAM: ${(data.free_heap / 1024).toFixed(1)} KB`;
         }
 
-        // Render Events
+        // Кількість тривог
+        const missiles = data.active_missiles || 0;
+        const drones = data.active_drones || 0;
+        const totalAlerts = data.active_alerts || (missiles + drones);
+        const peaceful = Math.max(0, 128 - totalAlerts);
+
+        document.getElementById('sum-red').textContent = missiles;
+        document.getElementById('sum-yellow').textContent = drones;
+        document.getElementById('sum-green').textContent = peaceful;
+
+        // Список останніх подій
         const elist = document.getElementById('event-list');
-        if (data.recentEvents && data.recentEvents.length > 0) {
-            elist.innerHTML = data.recentEvents.map(e => `
-                <li>
-                    <span class="district">${getAlertIcon(e.level)} ${e.district}</span>
-                    <span class="time">${e.time}</span>
-                </li>
-            `).join('');
+        if (data.recent_events && data.recent_events.length > 0) {
+            elist.innerHTML = data.recent_events.map(e => {
+                let badge = '🟢';
+                let actionText = 'Відбій тривоги';
+                if (e.level === 3) { badge = '🔴'; actionText = 'Ракетна небезпека'; }
+                else if (e.level === 1) { badge = '🟡'; actionText = 'Загроза дронів'; }
+                else if (e.level === 2) { badge = '🟠'; actionText = 'Часткова тривога'; }
+                
+                let timeStr = '';
+                if (e.timestamp && e.timestamp > 100000) {
+                    const d = new Date(e.timestamp * 1000);
+                    timeStr = d.toLocaleTimeString('uk-UA');
+                }
+                
+                return `<li>
+                    <span class="district">${badge} <strong>${e.district}</strong> — ${actionText}</span>
+                    <span class="time">${timeStr}</span>
+                </li>`;
+            }).join('');
         } else {
-            elist.innerHTML = '<li class="empty">РќРµРјР°С” РїРѕРґС–Р№</li>';
+            elist.innerHTML = '<li class="empty">Наразі немає нових подій</li>';
         }
         
     } catch (e) {
-        console.error('Status fetch failed', e);
+        // Якщо запит не вдалося виконати, помилка вже оброблена в apiGet
     }
-}
-
-function getAlertIcon(level) {
-    if(level === 'red') return 'рџ”ґ';
-    if(level === 'yellow') return 'рџџЎ';
-    return 'рџџў';
 }
 
 async function fetchStats() {
     try {
         const data = await apiGet('/api/stats');
-        document.getElementById('stat-alertsToday').textContent = data.alertsToday || 0;
-        document.getElementById('stat-clearsToday').textContent = data.clearsToday || 0;
-        document.getElementById('stat-lastAlert').textContent = data.lastAlertTime || '--:--';
-        document.getElementById('stat-longestAlert').textContent = data.longestAlert || '--';
-        document.getElementById('stat-uptime').textContent = formatUptime(data.uptime || 0);
+        document.getElementById('stat-alertsToday').textContent = data.totalAlertsToday !== undefined ? data.totalAlertsToday : (data.alertsToday || 0);
+        document.getElementById('stat-clearsToday').textContent = data.totalAllClearToday !== undefined ? data.totalAllClearToday : (data.clearsToday || 0);
+        
+        if (data.lastAlertTime && data.lastAlertTime > 100000) {
+            const d = new Date(data.lastAlertTime * 1000);
+            document.getElementById('stat-lastAlert').textContent = d.toLocaleTimeString('uk-UA');
+        } else {
+            document.getElementById('stat-lastAlert').textContent = 'Немає даних';
+        }
+        
+        if (data.longestAlertDuration && data.longestAlertDuration > 0) {
+            const dur = formatDuration(data.longestAlertDuration);
+            const dist = data.longestAlertDistrict ? ` (${data.longestAlertDistrict})` : '';
+            document.getElementById('stat-longestAlert').textContent = dur + dist;
+        } else {
+            document.getElementById('stat-longestAlert').textContent = 'Немає даних';
+        }
+        
+        document.getElementById('stat-uptime').textContent = formatUptime(data.uptimeSeconds || data.uptime || 0);
         document.getElementById('stat-wifiReconnects').textContent = data.wifiReconnects || 0;
         document.getElementById('stat-apiRequests').textContent = data.apiRequests || 0;
         document.getElementById('stat-apiErrors').textContent = data.apiErrors || 0;
-        document.getElementById('stat-freeHeap').textContent = data.freeHeap ? `${data.freeHeap} bytes` : '--';
+        document.getElementById('stat-freeHeap').textContent = data.freeHeap ? `${(data.freeHeap / 1024).toFixed(1)} KB` : '--';
     } catch (e) {}
 }
 
@@ -233,223 +302,296 @@ async function fetchConfig() {
         configData = await apiGet('/api/config');
         populateConfigForm(configData);
     } catch (e) {
-        console.error('Config fetch failed', e);
+        console.error('Не вдалося завантажити конфігурацію', e);
     }
 }
 
 function populateConfigForm(cfg) {
-    document.getElementById('cfg-apiToken').value = cfg.apiToken || '';
-    document.getElementById('cfg-updateInterval').value = cfg.updateInterval || 15;
+    if (cfg.api_token) {
+        document.getElementById('cfg-apiToken').value = cfg.api_token;
+    }
+    document.getElementById('cfg-updateInterval').value = cfg.poll_interval ? Math.round(cfg.poll_interval / 1000) : 10;
     
-    document.getElementById('cfg-colorOk').value = uint32ToHex(cfg.colorOk || 0x00ff00);
-    document.getElementById('cfg-colorDrone').value = uint32ToHex(cfg.colorDrone || 0xffff00);
-    document.getElementById('cfg-colorMissile').value = uint32ToHex(cfg.colorMissile || 0xff0000);
-    document.getElementById('cfg-colorPartial').value = uint32ToHex(cfg.colorPartial || 0xff8800);
-    document.getElementById('cfg-colorOffline').value = uint32ToHex(cfg.colorOffline || 0x0000ff);
+    document.getElementById('cfg-colorOk').value = uint32ToHex(cfg.color_ok !== undefined ? cfg.color_ok : 0x00FF00);
+    document.getElementById('cfg-colorDrone').value = uint32ToHex(cfg.color_drones !== undefined ? cfg.color_drones : 0xFFFF00);
+    document.getElementById('cfg-colorMissile').value = uint32ToHex(cfg.color_missiles !== undefined ? cfg.color_missiles : 0xFF0000);
+    document.getElementById('cfg-colorPartial').value = uint32ToHex(cfg.color_partial !== undefined ? cfg.color_partial : 0xFF8800);
+    document.getElementById('cfg-colorOffline').value = uint32ToHex(cfg.color_offline !== undefined ? cfg.color_offline : 0x0000FF);
     
-    document.getElementById('cfg-dayBright').value = cfg.dayBright || 255;
-    document.getElementById('val-dayBright').textContent = cfg.dayBright || 255;
+    const dayB = cfg.brightness_day !== undefined ? cfg.brightness_day : 128;
+    document.getElementById('cfg-dayBright').value = dayB;
+    document.getElementById('val-dayBright').textContent = dayB;
     
-    document.getElementById('cfg-nightBright').value = cfg.nightBright || 50;
-    document.getElementById('val-nightBright').textContent = cfg.nightBright || 50;
+    const nightB = cfg.brightness_night !== undefined ? cfg.brightness_night : 20;
+    document.getElementById('cfg-nightBright').value = nightB;
+    document.getElementById('val-nightBright').textContent = nightB;
     
-    document.getElementById('cfg-nightMode').checked = cfg.nightMode || false;
-    document.getElementById('cfg-nightStart').value = cfg.nightStart || 22;
-    document.getElementById('cfg-nightEnd').value = cfg.nightEnd || 7;
+    document.getElementById('cfg-nightMode').checked = cfg.night_mode_enabled !== false;
+    document.getElementById('cfg-nightStart').value = cfg.night_start_hour !== undefined ? cfg.night_start_hour : 23;
+    document.getElementById('cfg-nightEnd').value = cfg.night_end_hour !== undefined ? cfg.night_end_hour : 7;
     
-    document.getElementById('cfg-animSmooth').checked = cfg.animSmooth !== false;
-    document.getElementById('cfg-animPulse').checked = cfg.animPulse || false;
-    document.getElementById('cfg-animWave').checked = cfg.animWave || false;
+    // Анімації
+    document.getElementById('cfg-animMode').value = cfg.alert_animation_mode !== undefined ? cfg.alert_animation_mode : 0;
+    document.getElementById('cfg-animSmooth').checked = cfg.smooth_transitions !== false;
+    document.getElementById('cfg-animPulse').checked = cfg.pulse_on_alert !== false;
+    document.getElementById('cfg-animWave').checked = cfg.wave_on_new_alert !== false;
     
-    document.getElementById('cfg-ledType').value = cfg.ledType || 'WS2812B';
-    document.getElementById('cfg-colorOrder').value = cfg.colorOrder || 'GRB';
+    // LED та кольори
+    document.getElementById('cfg-ledType').value = cfg.led_type !== undefined ? cfg.led_type : 1;
+    document.getElementById('cfg-colorOrder').value = cfg.color_order !== undefined ? cfg.color_order : 0;
     
-    document.getElementById('cfg-ghOwner').value = cfg.ghOwner || 'alertmap';
-    document.getElementById('cfg-ghRepo').value = cfg.ghRepo || 'esp32-fw';
-    document.getElementById('cfg-ghAutoCheck').checked = cfg.ghAutoCheck || false;
+    // GitHub OTA
+    const owner = cfg.github_owner || 'YellowDoctor';
+    const repo = cfg.github_repo || 'AlertMap';
+    document.getElementById('cfg-ghOwner').value = owner;
+    document.getElementById('cfg-ghRepo').value = repo;
+    document.getElementById('cfg-ghAutoCheck').checked = cfg.auto_check_updates || false;
+    document.getElementById('gh-repo-display').textContent = `${owner}/${repo}`;
     
-    document.getElementById('gh-repo-display').textContent = `${cfg.ghOwner || '-'}/${cfg.ghRepo || '-'}`;
+    // Wi-Fi
+    if (cfg.wifi_ssid) {
+        document.getElementById('wifi-ssid').value = cfg.wifi_ssid;
+    }
 }
 
-// --- EVENT LISTENERS ---
+// --- ОБРОБНИКИ ПОДІЙ ---
 function setupEventListeners() {
-    // Config form
-    document.getElementById('config-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = {
-            apiToken: document.getElementById('cfg-apiToken').value,
-            updateInterval: parseInt(document.getElementById('cfg-updateInterval').value),
-            
-            colorOk: hexToUint32(document.getElementById('cfg-colorOk').value),
-            colorDrone: hexToUint32(document.getElementById('cfg-colorDrone').value),
-            colorMissile: hexToUint32(document.getElementById('cfg-colorMissile').value),
-            colorPartial: hexToUint32(document.getElementById('cfg-colorPartial').value),
-            colorOffline: hexToUint32(document.getElementById('cfg-colorOffline').value),
-            
-            dayBright: parseInt(document.getElementById('cfg-dayBright').value),
-            nightBright: parseInt(document.getElementById('cfg-nightBright').value),
-            nightMode: document.getElementById('cfg-nightMode').checked,
-            nightStart: parseInt(document.getElementById('cfg-nightStart').value),
-            nightEnd: parseInt(document.getElementById('cfg-nightEnd').value),
-            
-            animSmooth: document.getElementById('cfg-animSmooth').checked,
-            animPulse: document.getElementById('cfg-animPulse').checked,
-            animWave: document.getElementById('cfg-animWave').checked,
-            
-            ledType: document.getElementById('cfg-ledType').value,
-            colorOrder: document.getElementById('cfg-colorOrder').value,
-            
-            ghOwner: document.getElementById('cfg-ghOwner').value,
-            ghRepo: document.getElementById('cfg-ghRepo').value,
-            ghAutoCheck: document.getElementById('cfg-ghAutoCheck').checked
-        };
-        
-        await apiPost('/api/config', payload);
-        fetchConfig(); // Reload
-    });
-
-    // WiFi form
-    document.getElementById('wifi-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = {
-            ssid: document.getElementById('wifi-ssid').value,
-            pass: document.getElementById('wifi-pass').value
-        };
-        await apiPost('/api/wifi', payload);
-        showConfirmModal('WiFi Р—Р±РµСЂРµР¶РµРЅРѕ', 'РџСЂРёСЃС‚СЂС–Р№ РїРѕС‚СЂС–Р±РЅРѕ РїРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РґР»СЏ Р·Р°СЃС‚РѕСЃСѓРІР°РЅРЅСЏ РЅР°Р»Р°С€С‚СѓРІР°РЅСЊ. РџРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РёС‚Рё Р·Р°СЂР°Р·?', () => {
-            apiPost('/api/restart', {});
-        });
-    });
-
-    // Brightness live update handlers
+    // Повзунки яскравості
     document.getElementById('cfg-dayBright').addEventListener('input', (e) => {
         document.getElementById('val-dayBright').textContent = e.target.value;
     });
+    
     document.getElementById('cfg-nightBright').addEventListener('input', (e) => {
         document.getElementById('val-nightBright').textContent = e.target.value;
     });
 
-    // Action buttons
-    document.getElementById('btn-test').addEventListener('click', () => {
-        apiPost('/api/test/pattern', { pattern: 'cycle' });
-        showToast('РўРµСЃС‚РѕРІРёР№ СЂРµР¶РёРј Р·Р°РїСѓС‰РµРЅРѕ');
-    });
+    // Форма налаштувань
+    document.getElementById('config-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const tokenInput = document.getElementById('cfg-apiToken').value.trim();
+        const payload = {
+            poll_interval: parseInt(document.getElementById('cfg-updateInterval').value) * 1000,
+            
+            color_ok: hexToUint32(document.getElementById('cfg-colorOk').value),
+            color_drones: hexToUint32(document.getElementById('cfg-colorDrone').value),
+            color_missiles: hexToUint32(document.getElementById('cfg-colorMissile').value),
+            color_partial: hexToUint32(document.getElementById('cfg-colorPartial').value),
+            color_offline: hexToUint32(document.getElementById('cfg-colorOffline').value),
+            
+            brightness_day: parseInt(document.getElementById('cfg-dayBright').value),
+            brightness_night: parseInt(document.getElementById('cfg-nightBright').value),
+            night_mode_enabled: document.getElementById('cfg-nightMode').checked,
+            night_start_hour: parseInt(document.getElementById('cfg-nightStart').value),
+            night_end_hour: parseInt(document.getElementById('cfg-nightEnd').value),
+            
+            alert_animation_mode: parseInt(document.getElementById('cfg-animMode').value),
+            smooth_transitions: document.getElementById('cfg-animSmooth').checked,
+            pulse_on_alert: document.getElementById('cfg-animPulse').checked,
+            wave_on_new_alert: document.getElementById('cfg-animWave').checked,
+            
+            led_type: parseInt(document.getElementById('cfg-ledType').value),
+            color_order: parseInt(document.getElementById('cfg-colorOrder').value),
+            
+            github_owner: document.getElementById('cfg-ghOwner').value.trim(),
+            github_repo: document.getElementById('cfg-ghRepo').value.trim(),
+            auto_check_updates: document.getElementById('cfg-ghAutoCheck').checked
+        };
+        
+        // Передаємо токен лише якщо користувач ввів новий (не маскований)
+        if (tokenInput && !tokenInput.startsWith('...')) {
+            payload.api_token = tokenInput;
+        }
 
-    document.getElementById('btn-restart').addEventListener('click', () => {
-        showConfirmModal('РџРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ', 'Р’Рё РІРїРµРІРЅРµРЅС– С‰Рѕ С…РѕС‡РµС‚Рµ РїРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РїСЂРёСЃС‚СЂС–Р№?', () => {
-            apiPost('/api/restart', {});
-            showToast('РџСЂРёСЃС‚СЂС–Р№ РїРµСЂРµР·Р°РІР°РЅС‚Р°Р¶СѓС”С‚СЊСЃСЏ...', 'info');
-        });
-    });
-
-    // OTA Section
-    document.getElementById('btn-check-update').addEventListener('click', async () => {
         try {
-            const btn = document.getElementById('btn-check-update');
-            btn.textContent = 'вЏі РџРµСЂРµРІС–СЂРєР°...';
-            btn.disabled = true;
-            
-            const data = await apiGet('/api/ota/check');
-            
-            if (data.available) {
-                document.getElementById('gh-update-info').classList.remove('hidden');
-                document.getElementById('gh-release-notes').innerHTML = `<strong>РќРѕРІР° РІРµСЂСЃС–СЏ: ${data.version}</strong><br>${data.notes || ''}`;
-                showToast('Р—РЅР°Р№РґРµРЅРѕ РѕРЅРѕРІР»РµРЅРЅСЏ!', 'success');
-            } else {
-                document.getElementById('gh-update-info').classList.add('hidden');
-                showToast('РЈ РІР°СЃ РѕСЃС‚Р°РЅРЅСЏ РІРµСЂСЃС–СЏ.', 'info');
-            }
-        } catch (e) {
-            showToast('РџРѕРјРёР»РєР° РїРµСЂРµРІС–СЂРєРё РѕРЅРѕРІР»РµРЅСЊ', 'error');
-        } finally {
-            const btn = document.getElementById('btn-check-update');
-            btn.textContent = 'рџ”Ќ РџРµСЂРµРІС–СЂРёС‚Рё РѕРЅРѕРІР»РµРЅРЅСЏ';
-            btn.disabled = false;
+            await apiPost('/api/config', payload);
+            showToast('Налаштування успішно збережено!', 'success');
+            document.getElementById('gh-repo-display').textContent = `${payload.github_owner}/${payload.github_repo}`;
+        } catch (err) {
+            showToast('Помилка збереження налаштувань', 'error');
         }
     });
 
-    document.getElementById('btn-do-update').addEventListener('click', () => {
-        showConfirmModal('РћРЅРѕРІР»РµРЅРЅСЏ РїСЂРѕС€РёРІРєРё', 'РџС–Рґ С‡Р°СЃ РѕРЅРѕРІР»РµРЅРЅСЏ РЅРµ РІРёРјРёРєР°Р№С‚Рµ Р¶РёРІР»РµРЅРЅСЏ. РџСЂРѕРґРѕРІР¶РёС‚Рё?', () => {
-            apiPost('/api/ota/github', {});
-            startUpdateProgressMonitoring();
-        });
+    // Форма Wi-Fi
+    document.getElementById('wifi-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ssid = document.getElementById('wifi-ssid').value.trim();
+        const pass = document.getElementById('wifi-pass').value;
+        
+        showConfirmModal(
+            'Підключення до Wi-Fi',
+            `Зберегти мережу "${ssid}" та перезапустити модуль зв'язку?`,
+            async () => {
+                try {
+                    await apiPost('/api/wifi', { wifi_ssid: ssid, wifi_password: pass });
+                    showToast('Налаштування Wi-Fi збережено! Перепідключення...', 'success');
+                } catch (err) {
+                    showToast('Помилка при збереженні Wi-Fi', 'error');
+                }
+            }
+        );
     });
 
+    // Тест світлодіодів
+    document.getElementById('btn-test').addEventListener('click', async () => {
+        try {
+            await apiPost('/api/test/pattern', {});
+            showToast('Запущено тестовий райдужний режим діодів', 'info');
+        } catch (e) {
+            showToast('Помилка запуску тесту', 'error');
+        }
+    });
+
+    // Перезавантаження
+    document.getElementById('btn-restart').addEventListener('click', () => {
+        showConfirmModal(
+            'Перезавантаження пристрою',
+            'Ви впевнені, що хочете перезавантажити карту?',
+            async () => {
+                try {
+                    await apiPost('/api/restart', {});
+                    showToast('Карта перезавантажується... Зачекайте 10 секунд', 'warning');
+                } catch (e) {
+                    showToast('Помилка при відправці команди', 'error');
+                }
+            }
+        );
+    });
+
+    // Перевірка GitHub OTA
+    document.getElementById('btn-check-update').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-check-update');
+        btn.disabled = true;
+        btn.textContent = '⏳ Перевірка релізів на GitHub...';
+        
+        try {
+            const data = await apiGet('/api/ota/check');
+            const infoBox = document.getElementById('gh-update-info');
+            const notesEl = document.getElementById('gh-release-notes');
+            
+            if (data.available) {
+                notesEl.innerHTML = `<strong>Доступна нова версія: v${data.latest_version}</strong><br><br>${data.release_notes || 'Опис змін відсутній.'}`;
+                infoBox.classList.remove('hidden');
+                showToast(`Знайдено нову версію v${data.latest_version}!`, 'success');
+            } else {
+                infoBox.classList.add('hidden');
+                showToast(`У вас встановлена найновіша версія (v${data.current_version || '1.0.0'})`, 'info');
+            }
+        } catch (e) {
+            showToast('Не вдалося перевірити оновлення на GitHub', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🔍 Перевірити наявність оновлень';
+        }
+    });
+
+    // Оновлення напряму з GitHub
+    document.getElementById('btn-do-update').addEventListener('click', () => {
+        showConfirmModal(
+            'OTA Оновлення з GitHub',
+            'Плата завантажить нову прошивку з GitHub та перезавантажиться. Не вимикайте живлення під час оновлення!',
+            async () => {
+                try {
+                    await apiPost('/api/ota/github', {});
+                    showToast('Завантаження прошивки з GitHub розпочато...', 'info');
+                    trackOtaProgress();
+                } catch (e) {
+                    showToast('Помилка запуску OTA оновлення', 'error');
+                }
+            }
+        );
+    });
+
+    // Ручне завантаження файлу прошивки
     document.getElementById('upload-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const fileInput = document.getElementById('fw-file');
         if (!fileInput.files.length) return;
         
-        showConfirmModal('Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РїСЂРѕС€РёРІРєРё', 'РџС–Рґ С‡Р°СЃ РѕРЅРѕРІР»РµРЅРЅСЏ РЅРµ РІРёРјРёРєР°Р№С‚Рµ Р¶РёРІР»РµРЅРЅСЏ. РџСЂРѕРґРѕРІР¶РёС‚Рё?', () => {
-            uploadFirmware(fileInput.files[0]);
-        });
+        const file = fileInput.files[0];
+        showConfirmModal(
+            'Прошивка файлу',
+            `Завантажити та прошити "${file.name}" (${(file.size / 1024).toFixed(1)} KB)?`,
+            () => {
+                uploadFirmwareFile(file);
+            }
+        );
     });
 }
 
-// --- FIRMWARE UPLOAD ---
-function uploadFirmware(file) {
-    document.getElementById('update-progress-container').classList.remove('hidden');
+// --- ВІДСТЕЖЕННЯ ПРОГРЕСУ OTA ---
+function trackOtaProgress() {
+    const container = document.getElementById('update-progress-container');
     const fill = document.getElementById('update-fill');
     const text = document.getElementById('update-text');
     
-    const formData = new FormData();
-    formData.append('update', file, 'firmware.bin');
+    container.classList.remove('hidden');
+    fill.style.width = '0%';
+    text.textContent = '0% — Завантаження...';
+    
+    const interval = setInterval(async () => {
+        try {
+            const data = await apiGet('/api/ota/progress');
+            const percent = data.progress || 0;
+            fill.style.width = `${percent}%`;
+            text.textContent = `${percent}% — ${data.message || 'Оновлення...'}`;
+            
+            if (percent >= 100 || data.status === 'success') {
+                clearInterval(interval);
+                text.textContent = '100% — Успішно! Перезавантаження плати...';
+                showToast('Оновлення успішно завершено! Перезавантаження...', 'success');
+            } else if (data.status === 'error') {
+                clearInterval(interval);
+                text.textContent = 'Помилка оновлення: ' + (data.message || 'Невідома помилка');
+                showToast('Помилка під час оновлення!', 'error');
+            }
+        } catch (e) {
+            // При перезавантаженні зв'язок втрачається — це успіх
+            clearInterval(interval);
+            text.textContent = 'Оновлення завершено! Перезавантаження...';
+        }
+    }, 1500);
+}
+
+// --- ЗАВАНТАЖЕННЯ ФАЙЛУ ЧЕРЕЗ XHR ---
+function uploadFirmwareFile(file) {
+    const container = document.getElementById('update-progress-container');
+    const fill = document.getElementById('update-fill');
+    const text = document.getElementById('update-text');
+    
+    container.classList.remove('hidden');
+    fill.style.width = '0%';
+    text.textContent = '0% — Передача файлу на плату...';
     
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/ota/upload', true);
+    const formData = new FormData();
+    formData.append('file', file);
     
-    xhr.upload.onprogress = (e) => {
+    xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
             const percent = Math.round((e.loaded / e.total) * 100);
-            fill.style.width = percent + '%';
-            text.textContent = `${percent}% - Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С„Р°Р№Р»Сѓ...`;
+            fill.style.width = `${percent}%`;
+            text.textContent = `${percent}% — Завантаження (${(e.loaded / 1024).toFixed(0)} / ${(e.total / 1024).toFixed(0)} KB)...`;
         }
-    };
+    });
     
     xhr.onload = () => {
         if (xhr.status === 200) {
-            text.textContent = '100% - Р—Р°РІРµСЂС€РµРЅРѕ! РџРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...';
-            showToast('РћРЅРѕРІР»РµРЅРЅСЏ СѓСЃРїС–С€РЅРµ', 'success');
-            setTimeout(() => window.location.reload(), 10000);
+            fill.style.width = '100%';
+            text.textContent = '100% — Успішно записано! Перезавантаження...';
+            showToast('Файл успішно записано! Карта перезавантажується...', 'success');
+            setTimeout(() => location.reload(), 12000);
         } else {
-            text.textContent = 'РџРѕРјРёР»РєР° РѕРЅРѕРІР»РµРЅРЅСЏ';
-            fill.style.background = 'var(--danger)';
-            showToast('РџРѕРјРёР»РєР° РѕРЅРѕРІР»РµРЅРЅСЏ', 'error');
+            text.textContent = `Помилка запису (код ${xhr.status})`;
+            showToast('Помилка при завантаженні файлу', 'error');
         }
     };
     
     xhr.onerror = () => {
-        text.textContent = 'РџРѕРјРёР»РєР° РјРµСЂРµР¶С–';
-        fill.style.background = 'var(--danger)';
-        showToast('РџРѕРјРёР»РєР° РјРµСЂРµР¶С– РїСЂРё Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅС–', 'error');
+        text.textContent = 'Помилка зв'язку під час завантаження';
+        showToast('Помилка мережі при завантаженні', 'error');
     };
     
+    xhr.open('POST', '/api/ota/upload');
     xhr.send(formData);
-}
-
-function startUpdateProgressMonitoring() {
-    document.getElementById('update-progress-container').classList.remove('hidden');
-    const fill = document.getElementById('update-fill');
-    const text = document.getElementById('update-text');
-    
-    const iv = setInterval(async () => {
-        try {
-            const data = await apiGet('/api/ota/progress');
-            fill.style.width = data.progress + '%';
-            text.textContent = `${data.progress}% - ${data.status || 'РћРЅРѕРІР»РµРЅРЅСЏ...'}`;
-            
-            if (data.progress >= 100 || data.status === 'done') {
-                clearInterval(iv);
-                text.textContent = 'РћРЅРѕРІР»РµРЅРЅСЏ СѓСЃРїС–С€РЅРµ! РџРµСЂРµР·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ...';
-                showToast('РћРЅРѕРІР»РµРЅРЅСЏ Р·Р°РІРµСЂС€РµРЅРѕ', 'success');
-                setTimeout(() => window.location.reload(), 5000);
-            } else if (data.status === 'error') {
-                clearInterval(iv);
-                fill.style.background = 'var(--danger)';
-                text.textContent = 'РџРѕРјРёР»РєР° РѕРЅРѕРІР»РµРЅРЅСЏ';
-            }
-        } catch (e) {
-            // Keep trying or ignore temporary failure
-        }
-    }, 1000);
 }
